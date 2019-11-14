@@ -197,7 +197,7 @@ namespace Microsoft.ML.Tests
         }
 
         [Fact]
-        public void binaryClassificationTrainersOnnxConversionTest()
+        public void BinaryClassificationTrainersOnnxConversionTest()
         {
             var mlContext = new MLContext(seed: 1);
             string dataPath = GetDataPath("breast-cancer.txt");
@@ -1301,33 +1301,6 @@ namespace Microsoft.ML.Tests
                     // Scalar such as R4 (float) is converted to [1, 1]-tensor in ONNX format for consitency of making batch prediction.
                     Assert.Equal(1, actual.Length);
                     CompareNumbersWithTolerance(expected, actual.GetItemOrDefault(0), null, precision);
-                }
-            }
-        }
-        private void CompareSelectedScalarColumns<T>(string leftColumnName, string rightColumnName, IDataView left, IDataView right)
-        {
-            var leftColumn = left.Schema[leftColumnName];
-            var rightColumn = right.Schema[rightColumnName];
-
-            using (var expectedCursor = left.GetRowCursor(leftColumn))
-            using (var actualCursor = right.GetRowCursor(rightColumn))
-            {
-                T expected = default;
-                VBuffer<T> actual = default;
-                var expectedGetter = expectedCursor.GetGetter<T>(leftColumn);
-                var actualGetter = actualCursor.GetGetter<VBuffer<T>>(rightColumn);
-                while (expectedCursor.MoveNext() && actualCursor.MoveNext())
-                {
-                    expectedGetter(ref expected);
-                    actualGetter(ref actual);
-                    var actualVal = actual.GetItemOrDefault(0);
-
-                    Assert.Equal(1, actual.Length);
-
-                    if (typeof(T) == typeof(ReadOnlyMemory<Char>))
-                        Assert.Equal(expected.ToString(), actualVal.ToString());
-                    else
-                        Assert.Equal(expected, actualVal);
                 }
             }
         }
