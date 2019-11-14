@@ -132,6 +132,14 @@ namespace Microsoft.ML.Tests
             [LoadColumn(2, 9), VectorType(8)]
             public float[] Features;
         }
+        private class BreastCancerBinaryClassification
+        {
+            [LoadColumn(0)]
+            public bool Label;
+
+            [LoadColumn(2, 9), VectorType(8)]
+            public float[] Features;
+        }
 
         [LessThanNetCore30OrNotNetCoreFact("netcoreapp3.0 output differs from Baseline. Tracked by https://github.com/dotnet/machinelearning/issues/2087")]
         public void KmeansOnnxConversionTest()
@@ -188,6 +196,54 @@ namespace Microsoft.ML.Tests
             Done();
         }
 
+        [Fact]
+        public void binaryClassificationTrainersOnnxConversionTest()
+        {
+            var mlContext = new MLContext(seed: 1);
+            string dataPath = GetDataPath("breast-cancer.txt");
+            // Now read the file (remember though, readers are lazy, so the actual reading will happen when the data is accessed).
+            var dataView = mlContext.Data.LoadFromTextFile<BreastCancerBinaryClassification>(dataPath, separatorChar: '\t', hasHeader: true);
+            IEstimator<ITransformer>[] estimators = {
+                mlContext.BinaryClassification.Trainers.SymbolicSgdLogisticRegression(),
+                mlContext.BinaryClassification.Trainers.SgdCalibrated(),
+                mlContext.BinaryClassification.Trainers.AveragedPerceptron(),
+                mlContext.BinaryClassification.Trainers.FastForest(),
+                mlContext.BinaryClassification.Trainers.LinearSvm(),
+                mlContext.BinaryClassification.Trainers.SdcaNonCalibrated(),
+                mlContext.BinaryClassification.Trainers.SgdNonCalibrated(),
+                mlContext.BinaryClassification.Trainers.FastTree(),
+                mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression(),
+                mlContext.BinaryClassification.Trainers.LightGbm(),
+                mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(),
+                mlContext.BinaryClassification.Trainers.SgdCalibrated(),
+                mlContext.BinaryClassification.Trainers.SymbolicSgdLogisticRegression(),
+            };
+            var initialPipeline = mlContext.Transforms.ReplaceMissingValues("Features").
+                Append(mlContext.Transforms.NormalizeMinMax("Features"));
+            foreach (var estimator in estimators)
+            {
+                var pipeline = initialPipeline.Append(estimator);
+                var model = pipeline.Fit(dataView);
+                var transformedData = model.Transform(dataView);
+                var onnxModel = mlContext.Model.ConvertToOnnxProtobuf(model, dataView);
+                // Compare model scores produced by ML.NET and ONNX's runtime.
+                if (IsOnnxRuntimeSupported())
+                {
+                    var onnxFileName = $"{estimator.ToString()}.onnx";
+                    var onnxModelPath = GetOutputPath(onnxFileName);
+                    SaveOnnxModel(onnxModel, onnxModelPath, null);
+                    // Evaluate the saved ONNX model using the data used to train the ML.NET pipeline.
+                    string[] inputNames = onnxModel.Graph.Input.Select(valueInfoProto => valueInfoProto.Name).ToArray();
+                    string[] outputNames = onnxModel.Graph.Output.Select(valueInfoProto => valueInfoProto.Name).ToArray();
+                    var onnxEstimator = mlContext.Transforms.ApplyOnnxModel(outputNames, inputNames, onnxModelPath);
+                    var onnxTransformer = onnxEstimator.Fit(dataView);
+                    var onnxResult = onnxTransformer.Transform(dataView);
+                    CompareSelectedR4ScalarColumns(transformedData.Schema[5].Name, outputNames[3], transformedData, onnxResult, 3);
+                    CompareSelectedScalarColumns<Boolean>(transformedData.Schema[4].Name, outputNames[2], transformedData, onnxResult);
+                }
+            }
+            Done();
+        }
         private class DataPoint
         {
             [VectorType(3)]
@@ -1081,7 +1137,8 @@ namespace Microsoft.ML.Tests
             var dummyExample = new BreastCancerFeatureVector() { Features = null };
             var dummyExample1 = new BreastCancerCatFeatureExample() { Label = false, F1 = 0, F2 = "Amy" };
             var dummyExample2 = new BreastCancerMulticlassExample() { Label = "Amy", Features = null };
-            var dummyExample3 = new SmallSentimentExample() { Tokens = null };
+            var dummyExample3 = new BreastCancerBinaryClassification() { Label = false, Features = null };
+            var dummyExample4 = new SmallSentimentExample() { Tokens = null };
         }
 
         private void CompareResults(string leftColumnName, string rightColumnName, IDataView left, IDataView right)
@@ -1243,7 +1300,34 @@ namespace Microsoft.ML.Tests
 
                     // Scalar such as R4 (float) is converted to [1, 1]-tensor in ONNX format for consitency of making batch prediction.
                     Assert.Equal(1, actual.Length);
-                    Assert.Equal(expected, actual.GetItemOrDefault(0), precision);
+                    CompareNumbersWithTolerance(expected, actual.GetItemOrDefault(0), null, precision);
+                }
+            }
+        }
+        private void CompareSelectedScalarColumns<T>(string leftColumnName, string rightColumnName, IDataView left, IDataView right)
+        {
+            var leftColumn = left.Schema[leftColumnName];
+            var rightColumn = right.Schema[rightColumnName];
+
+            using (var expectedCursor = left.GetRowCursor(leftColumn))
+            using (var actualCursor = right.GetRowCursor(rightColumn))
+            {
+                T expected = default;
+                VBuffer<T> actual = default;
+                var expectedGetter = expectedCursor.GetGetter<T>(leftColumn);
+                var actualGetter = actualCursor.GetGetter<VBuffer<T>>(rightColumn);
+                while (expectedCursor.MoveNext() && actualCursor.MoveNext())
+                {
+                    expectedGetter(ref expected);
+                    actualGetter(ref actual);
+                    var actualVal = actual.GetItemOrDefault(0);
+
+                    Assert.Equal(1, actual.Length);
+
+                    if (typeof(T) == typeof(ReadOnlyMemory<Char>))
+                        Assert.Equal(expected.ToString(), actualVal.ToString());
+                    else
+                        Assert.Equal(expected, actualVal);
                 }
             }
         }
