@@ -3049,6 +3049,7 @@ namespace Microsoft.ML.Trainers.FastTree
         bool ISingleCanSaveOnnx.SaveAsOnnx(OnnxContext ctx, string[] outputNames, string featureColumn)
         {
             Host.CheckValue(ctx, nameof(ctx));
+            Host.Assert(Utils.Size(outputNames) >= 1);
 
             //Nodes.
             var nodesTreeids = new List<long>();

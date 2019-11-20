@@ -203,21 +203,24 @@ namespace Microsoft.ML.Tests
             string dataPath = GetDataPath("breast-cancer.txt");
             // Now read the file (remember though, readers are lazy, so the actual reading will happen when the data is accessed).
             var dataView = mlContext.Data.LoadFromTextFile<BreastCancerBinaryClassification>(dataPath, separatorChar: '\t', hasHeader: true);
-            IEstimator<ITransformer>[] estimators = {
-                mlContext.BinaryClassification.Trainers.SymbolicSgdLogisticRegression(),
-                mlContext.BinaryClassification.Trainers.SgdCalibrated(),
+            List<IEstimator<ITransformer>> estimators = new List<IEstimator<ITransformer>>()
+            {
                 mlContext.BinaryClassification.Trainers.AveragedPerceptron(),
                 mlContext.BinaryClassification.Trainers.FastForest(),
-                mlContext.BinaryClassification.Trainers.LinearSvm(),
-                mlContext.BinaryClassification.Trainers.SdcaNonCalibrated(),
-                mlContext.BinaryClassification.Trainers.SgdNonCalibrated(),
                 mlContext.BinaryClassification.Trainers.FastTree(),
                 mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression(),
-                mlContext.BinaryClassification.Trainers.LightGbm(),
+                mlContext.BinaryClassification.Trainers.LinearSvm(),
                 mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(),
+                mlContext.BinaryClassification.Trainers.SdcaNonCalibrated(),
                 mlContext.BinaryClassification.Trainers.SgdCalibrated(),
+                mlContext.BinaryClassification.Trainers.SgdNonCalibrated(),
                 mlContext.BinaryClassification.Trainers.SymbolicSgdLogisticRegression(),
             };
+            if (Environment.Is64BitProcess)
+            {
+                estimators.Add(mlContext.BinaryClassification.Trainers.LightGbm());
+            }
+
             var initialPipeline = mlContext.Transforms.ReplaceMissingValues("Features").
                 Append(mlContext.Transforms.NormalizeMinMax("Features"));
             foreach (var estimator in estimators)

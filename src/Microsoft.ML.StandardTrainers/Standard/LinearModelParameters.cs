@@ -240,6 +240,8 @@ namespace Microsoft.ML.Trainers
         bool ISingleCanSaveOnnx.SaveAsOnnx(OnnxContext ctx, string[] outputs, string featureColumn)
         {
             Host.CheckValue(ctx, nameof(ctx));
+            Host.Assert(Utils.Size(outputs) >= 1);
+
             string opType = "LinearRegressor";
             string scoreVarName = (Utils.Size(outputs) == 2) ? outputs[1] : outputs[0]; // Get Score from PredictedLabel and/or Score columns
 
