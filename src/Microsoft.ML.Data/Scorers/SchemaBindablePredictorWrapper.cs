@@ -426,6 +426,10 @@ namespace Microsoft.ML.Data
 
             var mapper = ValueMapper as ISingleCanSaveOnnx;
             Contracts.CheckValue(mapper, nameof(mapper));
+
+            if (mapper.ToString().EndsWith("PriorModelParameters")) {
+                return mapper.SaveAsOnnx(ctx, outputNames, schema.Schema[0].Name);
+            }
             Contracts.Assert(schema.Feature.HasValue);
             Contracts.Assert(Utils.Size(outputNames) == 3); // Predicted Label, Score and Probablity.
 
