@@ -546,6 +546,7 @@ namespace Microsoft.ML.Trainers
                     predictorOutputNames[0] = ctx.AddIntermediateVariable(NumberDataViewType.UInt32, $"{DefaultColumnNames.PredictedLabel}_{i}", true);
                     predictorOutputNames[1] = ctx.AddIntermediateVariable(NumberDataViewType.Single, $"{DefaultColumnNames.Score}_{i}", true);
                     predictorOutputNames[2] = ctx.AddIntermediateVariable(NumberDataViewType.Single, $"{DefaultColumnNames.Probability}_{i}", true);
+
                     string clipInput = predictorOutputNames[2];
 
                     var pred = Predictors[i] as ISingleCanSaveOnnx;
