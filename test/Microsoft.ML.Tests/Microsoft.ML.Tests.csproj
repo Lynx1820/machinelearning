@@ -43,6 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.1.1" />
     <PackageReference Include="Microsoft.ML.TensorFlow.TestModels" Version="$(MicrosoftMLTensorFlowTestModelsVersion)" />
     <PackageReference Include="Microsoft.ML.Onnx.TestModels" Version="$(MicrosoftMLOnnxTestModelsVersion)" />
     <PackageReference Include="Microsoft.ML.TestDatabases" Version="$(MicrosoftMLTestDatabasesPackageVersion)" />
@@ -52,10 +53,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="ExpressionLanguageTests\TestData\ExprBindExInput.txt"/>
-    <EmbeddedResource Include="ExpressionLanguageTests\TestData\ExprBindInput.txt"/>
-    <EmbeddedResource Include="ExpressionLanguageTests\TestData\ExprCodeGenInput.txt"/>
-    <EmbeddedResource Include="ExpressionLanguageTests\TestData\ExprEvalInput.txt"/>
-    <EmbeddedResource Include="ExpressionLanguageTests\TestData\ExprParseInput.txt"/>
+    <EmbeddedResource Include="ExpressionLanguageTests\TestData\ExprBindExInput.txt" />
+    <EmbeddedResource Include="ExpressionLanguageTests\TestData\ExprBindInput.txt" />
+    <EmbeddedResource Include="ExpressionLanguageTests\TestData\ExprCodeGenInput.txt" />
+    <EmbeddedResource Include="ExpressionLanguageTests\TestData\ExprEvalInput.txt" />
+    <EmbeddedResource Include="ExpressionLanguageTests\TestData\ExprParseInput.txt" />
   </ItemGroup>
 </Project>

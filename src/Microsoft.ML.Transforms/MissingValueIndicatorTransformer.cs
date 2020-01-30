@@ -457,7 +457,7 @@ namespace Microsoft.ML.Transforms
                 var inputType = _infos[iinfo].InputType;
                 Type rawType = (inputType is VectorDataViewType vectorType) ? vectorType.ItemType.RawType : inputType.RawType;
 
-                if (rawType != typeof(float))
+                if (rawType != typeof(float) && rawType != typeof(double))
                     return false;
 
                 string opType;
