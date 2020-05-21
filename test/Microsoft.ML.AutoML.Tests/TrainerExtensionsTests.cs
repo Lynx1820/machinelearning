@@ -299,8 +299,32 @@ namespace Microsoft.ML.AutoML.Test
     ""Score""
   ],
   ""Properties"": {
+<<<<<<< HEAD
     ""LabelColumnName"": ""L"",
     ""RowGroupColumnName"": ""GId""
+=======
+    ""LabelColumnName"": ""Label""
+  }
+}";
+            Util.AssertObjectMatchesJson(expectedJson, pipelineNode);
+        }
+
+        [Fact]
+        public void BuildRankingPipelineNode()
+        {
+            var pipelineNode = new FastTreeRankingExtension().CreatePipelineNode(null, new ColumnInformation());
+            var expectedJson = @"{
+  ""Name"": ""FastTreeRanking"",
+  ""NodeType"": ""Trainer"",
+  ""InColumns"": [
+    ""Features""
+  ],
+  ""OutColumns"": [
+    ""Score""
+  ],
+  ""Properties"": {
+    ""LabelColumnName"": ""Label""
+>>>>>>> ranking files
   }
 }";
             Util.AssertObjectMatchesJson(expectedJson, pipelineNode);

@@ -406,7 +406,7 @@ namespace Microsoft.ML.AutoML
                 suggestedTransforms.AddRange(suggestions);
             }
 
-            if (task != TaskKind.Recommendation)
+            if (task != TaskKind.Recommendation && task != TaskKind.Ranking)
             {
                 var finalFeaturesConcatTransform = BuildFinalFeaturesConcatTransform(context, suggestedTransforms, intermediateCols);
                 if (finalFeaturesConcatTransform != null)

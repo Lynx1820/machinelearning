@@ -77,7 +77,7 @@ namespace mlnet.Tests
         public void ConsoleAppModelBuilderCSFileContentRegressionTest()
         {
             (Pipeline pipeline,
-                        ColumnInferenceResults columnInference) = GetMockedRegressionPipelineAndInference();
+                        ColumnInferenceResults columnInference) = GetMockedRankingPipelineAndInference();
 
             var consoleCodeGen = new CodeGenerator(pipeline, columnInference, CreateCodeGeneratorSettingsFor(TaskKind.Regression));
             var result = consoleCodeGen.GenerateConsoleAppProjectContents(_namespaceValue, typeof(float), true, true,
@@ -97,7 +97,6 @@ namespace mlnet.Tests
             var consoleCodeGen = new CodeGenerator(pipeline, columnInference, CreateCodeGeneratorSettingsFor(TaskKind.Ranking));
             var result = consoleCodeGen.GenerateConsoleAppProjectContents(_namespaceValue, typeof(float), true, true,
                 false, false, false, false);
-
             Approvals.Verify(result.modelBuilderCSFileContent);
         }
 
@@ -609,11 +608,16 @@ namespace mlnet.Tests
             return (_mockedPipeline, _columnInference);
         }
 
+<<<<<<< HEAD
+=======
+        //TODO
+>>>>>>> ranking files
         private (Pipeline, ColumnInferenceResults) GetMockedRankingPipelineAndInference()
         {
             if (_mockedPipeline == null)
             {
                 MLContext context = new MLContext();
+<<<<<<< HEAD
                 var hyperParam = new Dictionary<string, object>()
                 {
                     {"rowGroupColumnName","GroupId" },
@@ -627,15 +631,32 @@ namespace mlnet.Tests
                     lightGbmPipelineNode
                 });
                 _mockedPipeline = pipeline;
+=======
+                // same learners with different hyperparams
+                var hyperparams1 = new Microsoft.ML.AutoML.ParameterSet(new List<Microsoft.ML.AutoML.IParameterValue>() { new LongParameterValue("NumLeaves", 2) });
+                var trainer1 = new SuggestedTrainer(context, new LightGbmRankingExtension(), new ColumnInformation(), hyperparams1);
+                var transforms1 = new List<SuggestedTransform>() { ColumnConcatenatingExtension.CreateSuggestedTransform(context, new[] { "In" }, "Out") };
+                var inferredPipeline1 = new SuggestedPipeline(transforms1, new List<SuggestedTransform>(), trainer1, context, true);
+
+                this._mockedPipeline = inferredPipeline1.ToPipeline();
+>>>>>>> ranking files
                 var textLoaderArgs = new TextLoader.Options()
                 {
                     Columns = new[] {
                         new TextLoader.Column("Label", DataKind.Boolean, 0),
+<<<<<<< HEAD
                         new TextLoader.Column("GroupId", DataKind.Single, 1),
                         new TextLoader.Column("col1", DataKind.Single, 0),
                         new TextLoader.Column("col2", DataKind.String, 0),
                         new TextLoader.Column("col3", DataKind.Int32, 0),
                         new TextLoader.Column("col4", DataKind.UInt32, 0),
+=======
+                        new TextLoader.Column("col1", DataKind.Single, 1),
+                        new TextLoader.Column("col2", DataKind.Single, 0),
+                        new TextLoader.Column("col3", DataKind.String, 0),
+                        new TextLoader.Column("col4", DataKind.Int32, 0),
+                        new TextLoader.Column("col5", DataKind.UInt32, 0),
+>>>>>>> ranking files
                     },
                     AllowQuoting = true,
                     AllowSparse = true,
@@ -646,10 +667,16 @@ namespace mlnet.Tests
                 this._columnInference = new ColumnInferenceResults()
                 {
                     TextLoaderOptions = textLoaderArgs,
+<<<<<<< HEAD
                     ColumnInformation = new ColumnInformation() { LabelColumnName = "Label" , GroupIdColumnName = "GroupId"}
                 };
             }
 
+=======
+                    ColumnInformation = new ColumnInformation() { LabelColumnName = "Label" }
+                };
+            }
+>>>>>>> ranking files
             return (_mockedPipeline, _columnInference);
         }
 

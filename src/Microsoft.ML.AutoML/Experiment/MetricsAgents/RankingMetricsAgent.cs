@@ -17,7 +17,10 @@ namespace Microsoft.ML.AutoML
             _optimizingMetric = optimizingMetric;
         }
 
+<<<<<<< HEAD
         // Optimizing metric used: NDCG@10 and DCG@10
+=======
+>>>>>>> ranking files
         public double GetScore(RankingMetrics metrics)
         {
             if (metrics == null)
@@ -29,16 +32,27 @@ namespace Microsoft.ML.AutoML
             {
                 case RankingMetric.Ndcg:
                     return (metrics.NormalizedDiscountedCumulativeGains.Count >= 10) ? metrics.NormalizedDiscountedCumulativeGains[9] :
+<<<<<<< HEAD
                         metrics.NormalizedDiscountedCumulativeGains[metrics.NormalizedDiscountedCumulativeGains.Count - 1];
+=======
+                        metrics.NormalizedDiscountedCumulativeGains[metrics.NormalizedDiscountedCumulativeGains.Count - 1]; //NDCG@10
+>>>>>>> ranking files
                 case RankingMetric.Dcg:
                     return (metrics.DiscountedCumulativeGains.Count >= 10) ? metrics.DiscountedCumulativeGains[9] :
                         metrics.DiscountedCumulativeGains[metrics.DiscountedCumulativeGains.Count-1];
                 default:
                     throw MetricsAgentUtil.BuildMetricNotSupportedException(_optimizingMetric);
+<<<<<<< HEAD
             }
         }
 
         // REVIEW: model can't be perfect with DCG
+=======
+
+            }
+        }
+
+>>>>>>> ranking files
         public bool IsModelPerfect(double score)
         {
             if (double.IsNaN(score))
