@@ -124,7 +124,7 @@ namespace Microsoft.ML.AutoML.Test
         {
             string labelColumnName = "Label";
             string scoreColumnName = "Score";
-            string groupIdColumnName = "GroupId";
+            string groupIdColumnName = "CustomGroupName";
             string featuresColumnName = "Features";
             var mlContext = new MLContext(1);
 
@@ -225,7 +225,7 @@ namespace Microsoft.ML.AutoML.Test
                 Columns = new[]
                 {
                     new TextLoader.Column(labelColumnName, DataKind.Single, 0),
-                    new TextLoader.Column(groupIdColumnName, DataKind.UInt32, 1),
+                    new TextLoader.Column(groupIdColumnName, DataKind.Int32, 1),
                     new TextLoader.Column(featureColumnName, DataKind.Single, 2, 9)
                 }
             };
