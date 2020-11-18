@@ -116,7 +116,7 @@ jobs:
       - ${{ if eq(parameters.innerLoop, 'false') }}:
         - ${{ if and(eq(parameters.runSpecific, 'false'), eq(parameters.useVSTestTask, 'false')) }}:
           # TODO: Code coverage needs to be fixed.
-          - script: ${{ parameters.buildScript }} -configuration $(_configuration) -test -ci #-coverage=${{ parameters.codeCoverage }}
+          - script: ${{ parameters.buildScript }} -configuration $(_configuration) -test -ci -coverage=${{ parameters.codeCoverage }}
             displayName: Run All Tests.
         - ${{ if and(eq(parameters.runSpecific, 'true'), eq(parameters.useVSTestTask, 'false')) }}:
           - script: ${{ parameters.buildScript }} -configuration $(_configuration) -ci /p:TestRunnerAdditionalArguments='-trait$(spaceValue)Category=RunSpecificTest' #-coverage=${{ parameters.codeCoverage }}
